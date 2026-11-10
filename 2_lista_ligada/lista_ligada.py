@@ -1,17 +1,39 @@
-
 from no import No
 
-class Lista_Ligada:
+class ListaLigada:
 
     def __init__(self):
         self.primeiro: No = None
         self.tamanho = 0
 
+
+    def inserir_inicio(self, item):
+        """ Adiciona no início da lista """
+        
+        novo_no = No(item)
+        novo_no.proximo = self.primeiro
+        self.primeiro = novo_no
+        self.tamanho += 1
+
+
+    def __str__(self):
+        """ Monta uma string com os itens da lista """
+
+        no_atual = self.primeiro
+        string = ""
+
+        while no_atual:
+            string += str(no_atual.item) + " -> "
+            no_atual = no_atual.proximo
+
+        return string + "null"
+
+
     def adicionar(self, item):
-        """ Adiciona no fim da lista. análises de custo O(n)"""
+        """ Adiciona no fim da lista """
 
         novo_no = No(item)
-        if self.primeiro is None:
+        if self.vazia():
             self.primeiro = novo_no
         else:
             atual = self.primeiro
@@ -20,117 +42,103 @@ class Lista_Ligada:
             atual.proximo = novo_no
         self.tamanho += 1
 
-    def exibir(self):
-        """ Retorna os itens da lista em uma string. análises de custo O(n)"""
-
-        itens = []
-        no_atual = self.primeiro
-
-        while no_atual:
-            itens.append(str(no_atual.item))
-            no_atual = no_atual.proximo
-
-        return " -> ".join(itens) + (" -> null" if itens else "null")
 
     def pesquisar(self, item):
         """ Retorna True caso o item procurado exista na lista e
-        False, em caso contrário. análises de custo O(n)"""
+        False, em caso contrário. """
 
         atual = self.primeiro
-
         while atual:
             if atual.item == item:
                 return True
             atual = atual.proximo
-
         return False
+
 
     def obter(self, posicao):
         """ Retorna o item guardado em uma determinada posição da lista.
-        Caso a posição não exista na lista, retorna None. análises de custo O(n)"""
+        Caso a posição não exista na lista, retorna None. """
+        
+        if 0 <= posicao < self.tamanho:
+            atual = self.primeiro
+            for i in range(posicao): 
+                atual = atual.proximo
+            return atual.item
+        
+        return None
 
-        if posicao < 0 or posicao >= self.tamanho:
-            return None
-
-        atual = self.primeiro
-        indice = 0
-
-        while indice < posicao:
-            atual = atual.proximo
-            indice += 1
-
-        return atual.item
 
     def inserir(self, posicao, item):
-        """ Adiciona um item em uma posição da lista
+         """ Adiciona um item em uma posição da lista
         empurrando os demais itens para o fim da lista.
-        Se a posição não é válida, retorna False. análises de custo O(n)"""
+        Se a posição não é válida, retorna False. """
+         
+         if 0 <= posicao <= self.tamanho:
+            if posicao == 0:
+                self.inserir_inicio(item)
+            else:
+                novo_no = No(item)
+                atual = self.primeiro
+                for i in range(posicao - 1):
+                    atual = atual.proximo
+                novo_no.proximo = atual.proximo
+                atual.proximo = novo_no
+            self.tamanho += 1
+            return True
+         return False
 
-        if posicao < 0 or posicao > self.tamanho:
-            return False
+    def remover_inicio(self):
+        """ Remove o primeiro item da lista e o retorna """
 
-        novo_no = No(item)
+        if self.vazia():
+            return None
+        
+        item_removido = self.primeiro.item
+        self.primeiro = self.primeiro.proximo
+        self.tamanho -= 1
 
-        if posicao == 0:
-            novo_no.proximo = self.primeiro
-            self.primeiro = novo_no
-        else:
-            atual = self.primeiro
-            indice = 0
+        return item_removido        
 
-            while indice < posicao - 1:
-                atual = atual.proximo
-                indice += 1
-
-            novo_no.proximo = atual.proximo
-            atual.proximo = novo_no
-
-        self.tamanho += 1
-        return True
 
     def remover(self, posicao):
         """ Remove um item de uma posição da lista
         e puxa os demais itens para o início da lista.
-        Ao final, retorna True. Caso a posição não exista na lista, retorna False. análises de custo O(n)"""
+        Ao final, retorna o item removido. Caso a posição não exista na lista ou se a lista estiver vazia, retorna None. """
 
-        if posicao < 0 or posicao >= self.tamanho:
-            return False
+        if not self.vazia() and 0 <= posicao < self.tamanho:
+            if posicao == 0:
+                return self.remover_inicio()
+            else:
+                atual = self.primeiro
+                for i in range(posicao - 1):
+                    atual = atual.proximo
+                item_removido = atual.proximo.item
+                atual.proximo = atual.proximo.proximo
+                self.tamanho -= 1
+                return item_removido
+        return None
 
-        if posicao == 0:
-            self.primeiro = self.primeiro.proximo
-        else:
-            atual = self.primeiro
-            indice = 0
-
-            while indice < posicao - 1:
-                atual = atual.proximo
-                indice += 1
-
-            atual.proximo = atual.proximo.proximo
-
-        self.tamanho -= 1
-        return True
 
     def remover_item(self, item):
         """ Remove um item existente na lista e retorna True.
-        Caso o item não seja encontrado, retorna False. análises de custo O(n)"""
+        Caso o item não seja encontrado, retorna False. """
 
-        if self.primeiro is None:
+        if self.vazia():
             return False
-
+        
         if self.primeiro.item == item:
-            self.primeiro = self.primeiro.proximo
-            self.tamanho -= 1
+            self.remover_inicio()
             return True
-
+        
         atual = self.primeiro
-
         while atual.proximo:
             if atual.proximo.item == item:
                 atual.proximo = atual.proximo.proximo
                 self.tamanho -= 1
                 return True
-
             atual = atual.proximo
-
+        
         return False
+
+    def vazia(self):
+        return self.tamanho == 0
